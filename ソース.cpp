@@ -31,7 +31,7 @@ Data BlockSort_Enc(const DType& In) {
 				auto AR = std::get<0>(A[i]);
 				auto BR = std::get<0>(B[i]);
 				A = B = DD;
-				return std::isgreater(AR, BR);
+				return std::isless(AR, BR);
 			}
 		}
 		A = B = DD;
@@ -42,14 +42,36 @@ Data BlockSort_Enc(const DType& In) {
 	std::size_t L=0;
 
 	for (std::size_t i = 0; i < D.size(); i++) {
-		R.push_back(std::get<0>(D[i]));
-		if (std::get<1>(D[i]) == 0) { L = i+1; }
+		//R.push_back(std::get<0>(D[i]));
+		R.push_back(In[(std::get<1>(D[i]) + In.size() - 1) % In.size()]);
+		if (std::get<1>(D[i]) == 0) { L = i; }
 	}
 
-	std::rotate(R.begin(), R.end() - (L % R.size()), R.end());
+	return { R,L};
 
-	return { R,L };
+}
 
+
+DType BlockSort_Dec(const DType& D, std::size_t N){///,const DType& O,const Data& A) {
+	std::vector<std::tuple<Word, std::size_t>> V;
+	DType R;
+
+	for (std::size_t i = 0; i < D.size(); i++) {
+		V.push_back({D[i], i });
+	}
+
+	std::stable_sort(V.begin(), V.end(), [](auto& A, auto& B) {return std::isless(std::get<0>(A), std::get<0>(B)); });
+
+	for (std::size_t i = 0; i <V.size(); i++) {
+		N = std::get<1>(V[N]);
+		R.push_back(D[N]);	
+
+	}
+	//std::rotate(R.begin(), R.begin()+1, R.end());
+	//std::rotate(R.begin(), R.end()-N, R.end());
+	//std::reverse(R.begin(), R.end());
+
+	return R;
 }
 
 DType MakeCacao() {
@@ -58,6 +80,21 @@ DType MakeCacao() {
 	return R;
 }
 
+DType Make_cdebaaaa() {
+	DType R = { 'c','d','e','b','a','a','a','a'};
+
+	return R;
+}
+DType MakePapaya() {
+	DType R = { 'p','a','p','a','y','a',};
+
+	return R;
+}
+DType MakeBanana() {
+	DType R = { 'b','a','n','a','n','a',};
+
+	return R;
+}
 DType MakeVecor(std::size_t L, unsigned int S = 0) {
 	DType R;
 	std::mt19937 mt(S);
@@ -90,14 +127,31 @@ bool Show(const DType& In) {
 }
 int main() {
 	//auto D = MakeCacao();
+	//auto D = Make_cdebaaaa();
+	//auto D = MakePapaya();
+	//auto D = MakeBanana(); 
+	//auto D = MakeVecor2(8);
+//	auto D = MakeVecor2(128);
 
-	//auto D = MakeVecor2(16);
-	auto D = MakeVecor2(128);
+	auto D = MakeVecor2(1280);	
+	
 	Show(D);
+	std::cout << std::endl;
 
 	auto A = BlockSort_Enc(D);
 
 	Show(std::get<0>(A));
+	std::cout << std::endl;
+
+	auto B = BlockSort_Dec(std::get<0>(A), std::get<1>(A));// , D, A);
+
+	Show(B);
+	std::cout << std::endl;
+	if (D == B) {
+		std::cout<< std::endl << "good" << std::endl;
+	}else{
+		std::cout<< std::endl << "Bad" << std::endl;
+	}
 
 	return 0;
 	
