@@ -10,7 +10,32 @@ typedef std::vector<Word> DType;
 typedef std::vector<DType> DTypes;
 typedef std::tuple<DType, std::size_t> Data;
 
-Data BlockSort_Enc(const DType& In) {
+Data BlockSort_EncII(DType In) {//consume memory
+	std::vector<Data> D;
+	for (std::size_t i = 0; i < In.size(); i++) {
+		D.push_back({ In,i });
+		std::rotate(In.begin(), In.begin() + 1, In.end());
+	}
+
+	std::stable_sort(D.begin(), D.end(), [&](auto& A, auto& B) { return std::get<0>(A) < std::get<0>(B); });
+
+	std::size_t X = 0;
+	DType R;
+	for (std::size_t i = 0; i < In.size(); i++) {
+		if (std::get<1>(D[i]) == 0) {
+			X = i;
+			break;
+		}
+	}
+	for (std::size_t i = 0; i < In.size(); i++) {
+		//R.push_back(std::get<0>(D[(X + i) % D.size()])[0]);
+		R.push_back(std::get<0>(D[i]).back());
+	}
+	
+	return { R,X };
+}
+
+Data BlockSort_Enc(const DType& In) {//consume CPU Time
 	std::vector<std::tuple<Word, std::size_t>> D;
 
 	for (std::size_t i = 0; i < In.size(); i++) {
@@ -52,15 +77,18 @@ Data BlockSort_Enc(const DType& In) {
 }
 
 
-DType BlockSort_Dec(const DType& D, std::size_t N){///,const DType& O,const Data& A) {
+DType BlockSort_Dec( DType D, std::size_t N){///,const DType& O,const Data& A) {
 	std::vector<std::tuple<Word, std::size_t>> V;
 	DType R;
+
+	//std::rotate(D.begin(), D.begin() + (D.size()-(N)), D.end());
+	//std::rotate(D.begin(), D.begin() + N, D.end());
 
 	for (std::size_t i = 0; i < D.size(); i++) {
 		V.push_back({D[i], i });
 	}
 
-	std::stable_sort(V.begin(), V.end(), [](auto& A, auto& B) {return std::isless(std::get<0>(A), std::get<0>(B)); });
+	std::stable_sort(V.begin(), V.end(), [](auto& A, auto& B) {return std::get<0>(A)<std::get<0>(B); });
 
 	for (std::size_t i = 0; i <V.size(); i++) {
 		N = std::get<1>(V[N]);
@@ -131,14 +159,14 @@ int main() {
 	//auto D = MakePapaya();
 	//auto D = MakeBanana(); 
 	//auto D = MakeVecor2(8);
-//	auto D = MakeVecor2(128);
+	//auto D = MakeVecor2(128);
 
 	auto D = MakeVecor2(1280);	
 	
 	Show(D);
 	std::cout << std::endl;
 
-	auto A = BlockSort_Enc(D);
+	auto A = BlockSort_EncII(D);
 
 	Show(std::get<0>(A));
 	std::cout << std::endl;
